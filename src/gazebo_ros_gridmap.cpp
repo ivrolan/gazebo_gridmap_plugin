@@ -438,7 +438,7 @@ void GazeboRosGridmap::create_octomap()
     impl_->gridmap_.getPosition(*grid_iterator, current_pos);
     filter_min = impl_->gridmap_.atPosition("elevation", current_pos);
 
-    for (double k = filter_min + resolution; k < max_z; k += resolution) {
+    for (double k = filter_min + 0.75 * resolution; k < max_z; k += resolution) {
     if (voxel_is_obstacle(ignition::math::Vector3d(current_pos.x(), current_pos.y(), k), resolution, ray)) {
           impl_->octomap_->updateNode(current_pos.x(), current_pos.y(), k, true);
         }
