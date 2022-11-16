@@ -404,12 +404,12 @@ void GazeboRosGridmap::create_octomap()
 
   double & resolution = impl_->resolution_;
   // double & max_height = impl_->max_height_;
-  // double & min_height = impl_->min_height_;
-  double & min_x = impl_->min_scan_x_;
-  double & min_y = impl_->min_scan_y_;
-  double & min_z = impl_->min_scan_z_;
-  double & max_x = impl_->max_scan_x_;
-  double & max_y = impl_->max_scan_y_;
+  double & min_height = impl_->min_height_;
+  // double & min_x = impl_->min_scan_x_;
+  // double & min_y = impl_->min_scan_y_;
+  //double & min_z = impl_->min_scan_z_;
+  // double & max_x = impl_->max_scan_x_;
+  // double & max_y = impl_->max_scan_y_;
   double & max_z = impl_->max_scan_z_;
   double filter_min;
 
@@ -417,17 +417,16 @@ void GazeboRosGridmap::create_octomap()
 
   std::cout << "Creating octomap" << std::endl;
 
-  for (double i = min_x; i < max_x; i += resolution) {
-    for (double j = min_y; j < max_y; j += resolution) {
-      for (double k = min_z; k < max_z; k += resolution) {
-        if (voxel_is_obstacle(ignition::math::Vector3d(i, j, k), resolution, ray)) {
-          impl_->octomap_->updateNode(i, j, k, true);
-        }
-      }
-    }
-  }
+  // for (double i = min_x; i < max_x; i += resolution) {
+  //   for (double j = min_y; j < max_y; j += resolution) {
+  //     for (double k = min_z; k < max_z; k += resolution) {
+  //       if (voxel_is_obstacle(ignition::math::Vector3d(i, j, k), resolution, ray)) {
+  //         impl_->octomap_->updateNode(i, j, k, true);
+  //       }
+  //     }
+  //   }
+  // }
 
-  std::cout << "Octomap completed" << std::endl;
 
   // filter octomap
   // iterate the gridmap and set the elevation as max Z possible
@@ -439,10 +438,15 @@ void GazeboRosGridmap::create_octomap()
     impl_->gridmap_.getPosition(*grid_iterator, current_pos);
     filter_min = impl_->gridmap_.atPosition("elevation", current_pos);
 
-    for (double k = min_z; k < filter_min + resolution; k += resolution) {
-      impl_->octomap_->deleteNode(current_pos.x(), current_pos.y(), k);
+    for (double k = filter_min + resolution; k < max_z; k += resolution) {
+    if (voxel_is_obstacle(ignition::math::Vector3d(current_pos.x(), current_pos.y(), k), resolution, ray)) {
+          impl_->octomap_->updateNode(current_pos.x(), current_pos.y(), k, true);
+        }
     }
   }
+
+
+  std::cout << "Octomap completed" << std::endl;
   octomap_msgs::msg::Octomap message;
 
   octomap_msgs::fullMapToMsg(*(impl_->octomap_), message);
